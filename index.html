@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <title>Document</title>
+  <style type="text/css">
+    html,body,ul,li{
+      margin:0;
+      padding: 0;
+    }
+    html,body,ul{
+      width: 100%;
+      height: 100%;
+    }
+    ul{
+      position:relative;
+      overflow:hidden;
+    }
+    ul li{
+      display: block;
+      position:absolute;
+      top:0;
+      left:0;
+      width: 160px;
+      height: 160px;
+      background-color:red;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <ul class="redMap">
+  </ul>
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script>
+  // jQuery.extend( jQuery.easing,  
+  // {  
+  //     easeInOutSine: function (x, t, b, c, d) {
+  //       return -c/2 * (Math.cos(Math.PI*t/d) - 1) + b;
+  //     },
+  // });
+  ~function(){
+    var ScreenHeight=$(window).height();//可是窗口高度
+    var ScreenWidth=$(window).width();//可是窗口宽度
+    var redWidth=160;//红包宽度
+    var redHeight=160;//红包高度
+    var redPsnum=20;//每次显示红包的个数
+    var laryTimeout;
+    var Gb={
+      attr:function(){
+        if (arguments.length == 1){
+          return Gb[arguments[0]];
+        }else if (arguments.length == 2){
+          Gb[arguments[1]] = arguments[0]
+          return Gb;
+        }
+      }
+    };
+
+    //红包类
+    function RedP(obj,x,y,size,speed){
+        this.obj=obj;
+        this.x=x;
+        this.y=y;
+        this.size=size;
+        this.speed=speed;
+    };
+    RedP.prototype.move=function(){
+      var self=this;
+      //me.css({top:"0px",left:"200px"});
+      self.obj.css({top : self.y+"px",left : self.x+"px",width:redWidth*self.size+"px",height:redHeight*self.size+"px"});
+      var runTime;//纵坐标到0
+      var liveTime;//横坐标到0
+      liveTime=(redWidth*4+self.x)/self.speed;
+      runTime=(ScreenHeight-self.y)/self.speed; 
+      var endTime=Math.min(runTime,liveTime)+1000;
+      var Random_width=redHeight*Math.random();//随机斜率，终点横坐标的改变导致了斜率的不同
+      self.obj.animate({top :(ScreenHeight+redHeight),left : self.x-(ScreenHeight+Random_width)},runTime);
+      setTimeout(function(){
+        self.obj.stop();
+        self.obj.remove();
+        self=null;
+      }, liveTime);
+    };
+
+    $(document).ready(function(){
+      Gb.attr($('.redMap'), 'redMap');
+      CreatMap();
+    });
+
+    function CreatMap(){
+      $('<li class="redSign" style="top:-1000px;left:-1000px;"></span>').appendTo(Gb.attr('redMap'));
+      Gb.attr($('.redSign'), '.redSign');
+      //横坐标分区
+      var num=Math.ceil((ScreenWidth+ScreenHeight)/(redWidth*2));//加高度是为了右下角能有东西 毕竟这里设置的是宽高1:1的
+      CreatDom(num);
+    };
+    function ClickCheck(obj){
+      //ajax...
+      var loser=true;
+      var $obj=obj;
+      if(loser){
+        $obj.css({background:"#ccc"});
+        setTimeout(function(){
+          $obj.hide();
+        },200);
+      }
+    };
+    function CreatDom(num){
+      laryTimeout && clearTimeout(laryTimeout);
+      for (var i = 0; i < num; i++){
+        var x=i*redWidth*2+redWidth*Math.random();//随机横坐标
+        var y=-redHeight-redHeight*3*Math.random();//随机纵坐标
+        var size=1-0.4*Math.random();//随机尺寸
+        var speed=0.15+0.1*Math.random();//随机速度
+        new RedP(Gb.attr('.redSign').eq(0).clone().appendTo(Gb.attr('redMap')), x, y, size , speed).move();
+      }
+      var laryTimeout=setTimeout(function(){
+        CreatDom(num);
+      },2000);
+    };
+    $("ul").on("mousedown",".redSign",function(){
+      ClickCheck($(this));
+    });
+  }();
+  </script>
+</body>
+</html>
